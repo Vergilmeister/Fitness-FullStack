@@ -2,6 +2,7 @@
   "name": "fitlife",
   "version": "1.0.0",
   "description": "FitLife – Sports & Fitness Management System",
+  "type": "module",
   "main": "backend/server.js",
   "scripts": {
     "start": "node backend/server.js",

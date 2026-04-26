@@ -1,20 +1,25 @@
-// /backend/server.js
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const path = require('path');
-const cors = require('cors');
-require('dotenv').config();
-
-const connectDB = require('./config/db');
-const logger = require('./middleware/logger');
+import express from 'express';
+import http from 'http';
+import { Server } from 'socket.io';
+import path from 'path';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import mongoose from 'mongoose';
+import { fileURLToPath } from 'url';
 
 // Routes
-const authRoutes = require('./routes/auth');
-const workoutRoutes = require('./routes/workout');
-const profileRoutes = require('./routes/profile');
-const goalRoutes = require('./routes/goal');
-const aiRoutes = require('./routes/ai');
+import authRoutes from './routes/auth.js';
+import workoutRoutes from './routes/workout.js';
+import profileRoutes from './routes/profile.js';
+import goalRoutes from './routes/goal.js';
+import aiRoutes from './routes/ai.js';
+import logger from './middleware/logger.js';
+
+// Load environment variables for local development
+dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const server = http.createServer(app);
@@ -23,9 +28,6 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: { origin: '*', methods: ['GET', 'POST'] },
 });
-
-// Connect to MongoDB
-connectDB();
 
 // Middleware
 app.use(cors());
@@ -75,7 +77,24 @@ io.on('connection', (socket) => {
   });
 });
 
+// ---- Database Connection and Server Start ----
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-  console.log(`🚀 FitLife server running on http://localhost:${PORT}`);
-});
+const MONGO_URI = process.env.MONGO_URI;
+
+if (!MONGO_URI) {
+  console.error('❌ FATAL ERROR: MONGO_URI is not defined in environment variables.');
+  console.error('Please check your Render environment settings or local .env file.');
+  process.exit(1);
+}
+
+mongoose.connect(MONGO_URI)
+  .then((conn) => {
+    console.log(`✅ MongoDB Connected successfully: ${conn.connection.host}`);
+    server.listen(PORT, () => {
+      console.log(`🚀 FitLife server running on port ${PORT}`);
+    });
+  })
+  .catch((error) => {
+    console.error(`❌ MongoDB Connection Error: ${error.message}`);
+    process.exit(1);
+  });
