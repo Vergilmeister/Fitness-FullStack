@@ -13,8 +13,8 @@ router.use(protect);
 // @access Private
 router.get('/', async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 5;
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.max(1, Math.min(100, parseInt(req.query.limit) || 5)); // Cap limit at 100
     const skip = (page - 1) * limit;
 
     const total = await Workout.countDocuments({ user: req.user._id });
@@ -34,7 +34,8 @@ router.get('/', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Server error' });
+    console.error('Error fetching workouts:', error);
+    res.status(500).json({ success: false, message: 'Server error: ' + error.message });
   }
 });
 
@@ -69,22 +70,42 @@ router.post('/', async (req, res) => {
   try {
     const { title, type, duration, caloriesBurned, notes, date } = req.body;
 
-    if (!title || !type || !duration || !caloriesBurned) {
+    // Validation
+    if (!title || !type || duration === undefined || caloriesBurned === undefined) {
       return res.status(400).json({ success: false, message: 'Title, type, duration, and calories are required' });
+    }
+
+    // Type validation
+    const validTypes = ['cardio', 'strength', 'flexibility', 'hiit', 'yoga', 'sports', 'other'];
+    if (!validTypes.includes(type)) {
+      return res.status(400).json({ success: false, message: `Invalid workout type. Must be one of: ${validTypes.join(', ')}` });
+    }
+
+    // Duration validation
+    const durationNum = parseInt(duration);
+    if (isNaN(durationNum) || durationNum < 1) {
+      return res.status(400).json({ success: false, message: 'Duration must be a positive number (minutes)' });
+    }
+
+    // Calories validation
+    const caloriesNum = parseInt(caloriesBurned);
+    if (isNaN(caloriesNum) || caloriesNum < 0) {
+      return res.status(400).json({ success: false, message: 'Calories burned must be a non-negative number' });
     }
 
     const workout = await Workout.create({
       user: req.user._id,
       title,
       type,
-      duration,
-      caloriesBurned,
+      duration: durationNum,
+      caloriesBurned: caloriesNum,
       notes,
       date: date || Date.now(),
     });
 
     res.status(201).json({ success: true, workout });
   } catch (error) {
+    console.error('Error creating workout:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 });

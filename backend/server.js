@@ -37,6 +37,7 @@ import workoutRoutes from './routes/workout.js';
 import profileRoutes from './routes/profile.js';
 import goalRoutes from './routes/goal.js';
 import aiRoutes from './routes/ai.js';
+import connectDB from './config/db.js';
 
 app.use('/api/auth', authRoutes);
 app.use('/api/workouts', workoutRoutes);
@@ -72,27 +73,7 @@ io.on('connection', (socket) => {
   });
 });
 
-// 4. Database Connection Logic
-const connectDB = async () => {
-  const MONGO_URI = process.env.MONGO_URI;
-
-  if (!MONGO_URI) {
-    console.error('❌ FATAL ERROR: MONGO_URI is undefined.');
-    console.error('Set MONGO_URI in your Render environment variables or local .env file.');
-    process.exit(1);
-  }
-
-  try {
-    console.log('🔄 Connecting to MongoDB...');
-    const conn = await mongoose.connect(MONGO_URI);
-    console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
-  } catch (error) {
-    console.error(`❌ MongoDB Connection Failed: ${error.message}`);
-    process.exit(1);
-  }
-};
-
-// 5. Start Server
+// 4. Start Server
 const startServer = async () => {
   await connectDB();
 

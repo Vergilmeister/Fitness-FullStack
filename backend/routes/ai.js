@@ -19,18 +19,37 @@ router.post('/suggest', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Goal, age, and activity level are required' });
     }
 
+    // Validate age
+    const ageNum = parseInt(age);
+    if (isNaN(ageNum) || ageNum < 10 || ageNum > 120) {
+      return res.status(400).json({ success: false, message: 'Age must be between 10 and 120' });
+    }
+
+    // Validate goal
+    const validGoals = ['lose_weight', 'gain_muscle', 'maintain', 'improve_endurance'];
+    if (!validGoals.includes(goal)) {
+      return res.status(400).json({ success: false, message: `Invalid goal. Must be one of: ${validGoals.join(', ')}` });
+    }
+
+    // Validate activity level
+    const validLevels = ['sedentary', 'light', 'moderate', 'active', 'very_active'];
+    if (!validLevels.includes(activityLevel)) {
+      return res.status(400).json({ success: false, message: `Invalid activity level. Must be one of: ${validLevels.join(', ')}` });
+    }
+
     let workoutPlan = '';
     let dietSuggestion = '';
 
     // Try OpenAI if key is set
     if (process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY !== 'your_openai_api_key_here') {
-      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      try {
+        const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-      const prompt = `You are a professional fitness trainer. Based on the following details, provide a personalized weekly workout plan and diet suggestion.
-      
+        const prompt = `You are a professional fitness trainer. Based on the following details, provide a personalized weekly workout plan and diet suggestion.
+        
 User Details:
 - Fitness Goal: ${goal}
-- Age: ${age} years
+- Age: ${ageNum} years
 - Activity Level: ${activityLevel}
 
 Please provide:
@@ -39,20 +58,26 @@ Please provide:
 
 Keep it practical, motivating, and safe.`;
 
-      const completion = await openai.chat.completions.create({
-        model: 'gpt-3.5-turbo',
-        messages: [{ role: 'user', content: prompt }],
-        max_tokens: 800,
-      });
+        const completion = await openai.chat.completions.create({
+          model: 'gpt-3.5-turbo',
+          messages: [{ role: 'user', content: prompt }],
+          max_tokens: 800,
+        });
 
-      const responseText = completion.choices[0].message.content;
-      // Split response into workout and diet parts
-      const parts = responseText.split(/diet suggestion|2\./i);
-      workoutPlan = parts[0] ? parts[0].replace(/1\.\s*/i, '').trim() : responseText;
-      dietSuggestion = parts[1] ? parts[1].trim() : 'See full response above.';
+        const responseText = completion.choices[0].message.content;
+        // Split response into workout and diet parts
+        const parts = responseText.split(/diet suggestion|2\./i);
+        workoutPlan = parts[0] ? parts[0].replace(/1\.\s*/i, '').trim() : responseText;
+        dietSuggestion = parts[1] ? parts[1].trim() : 'See full response above.';
+      } catch (openaiError) {
+        console.error('OpenAI Error:', openaiError.message);
+        // Fall back to mock response on OpenAI error
+        workoutPlan = generateMockWorkoutPlan(goal, ageNum, activityLevel);
+        dietSuggestion = generateMockDiet(goal);
+      }
     } else {
       // Fallback mock response when OpenAI key not set
-      workoutPlan = generateMockWorkoutPlan(goal, age, activityLevel);
+      workoutPlan = generateMockWorkoutPlan(goal, ageNum, activityLevel);
       dietSuggestion = generateMockDiet(goal);
     }
 
@@ -60,7 +85,7 @@ Keep it practical, motivating, and safe.`;
     const suggestion = await Suggestion.create({
       user: req.user._id,
       goal,
-      age,
+      age: ageNum,
       activityLevel,
       workoutPlan,
       dietSuggestion,

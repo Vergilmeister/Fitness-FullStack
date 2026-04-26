@@ -1,7 +1,8 @@
 // /frontend/js/main.js
 // Shared utilities used across all pages
 
-const API_BASE = '/api';
+// Use relative URL for API to work in both development and production
+const API_BASE = "/api";
 
 /* ===== Token Helpers ===== */
 const getToken = () => localStorage.getItem('fitlife_token');
@@ -90,6 +91,19 @@ const formatDate = (dateStr) => {
 
 /* ===== Today's date YYYY-MM-DD ===== */
 const todayStr = () => new Date().toISOString().split('T')[0];
+
+/* ===== HTML Escape for Security (prevent XSS) ===== */
+const escapeHtml = (text) => {
+  if (!text) return '';
+  const map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+  return text.replace(/[&<>"']/g, char => map[char]);
+};
 
 /* ===== Run on DOM ready ===== */
 document.addEventListener('DOMContentLoaded', () => {
