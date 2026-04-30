@@ -87,12 +87,12 @@ Robust user registration and login system using **JWT (JSON Web Tokens)** and **
 
 Fitness-FullStack/
 │
-├── frontend/        # UI (HTML, CSS, JS)
-├── backend/         # Server & API logic
-├── models/          # Database schemas
-├── routes/          # API routes
-├── middleware/      # Auth middleware
-├── .env             # Environment variables
+├── frontend/ # UI (HTML, CSS, JS)
+├── backend/ # Server & API logic
+├── models/ # Database schemas
+├── routes/ # API routes
+├── middleware/ # Auth middleware
+├── .env # Environment variables
 └── README.md
 ---
 
