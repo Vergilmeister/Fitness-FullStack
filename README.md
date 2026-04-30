@@ -85,17 +85,15 @@ Robust user registration and login system using **JWT (JSON Web Tokens)** and **
 
 ## 📂 Project Structure
 
-
 Fitness-FullStack/
 │
-├── frontend/ # UI (HTML, CSS, JS)
-├── backend/ # Server & API logic
-├── models/ # Database schemas
-├── routes/ # API routes
-├── middleware/ # Auth middleware
-├── .env # Environment variables
+├── frontend/        # UI (HTML, CSS, JS)
+├── backend/         # Server & API logic
+├── models/          # Database schemas
+├── routes/          # API routes
+├── middleware/      # Auth middleware
+├── .env             # Environment variables
 └── README.md
-
 ---
 
 API Endpoints
