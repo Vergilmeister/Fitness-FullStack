@@ -96,13 +96,15 @@ Fitness-FullStack/
 ├── .env # Environment variables
 └── README.md
 
-🔗 API Endpoints
-Method	Endpoint	Description
-POST	/auth/register	Register new user
-POST	/auth/login	Login user
-GET	/profile	Get user profile
-POST	/ai/suggest	Get AI fitness plan
-GET	/history	Fetch past suggestions
+API Endpoints
+
+| Method | Endpoint       | Description            |
+| ------ | -------------- | ---------------------- |
+| POST   | /auth/register | Register new user      |
+| POST   | /auth/login    | Login user             |
+| GET    | /profile       | Get user profile       |
+| POST   | /ai/suggest    | Get AI fitness plan    |
+| GET    | /history       | Fetch past suggestions |
 
 ## 🤝 Contributing
 Contributions are welcome! Please fork the repo and create a pull request.
