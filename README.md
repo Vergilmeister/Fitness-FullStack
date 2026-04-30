@@ -96,6 +96,8 @@ Fitness-FullStack/
 ├── .env # Environment variables
 └── README.md
 
+---
+
 API Endpoints
 
 | Method | Endpoint       | Description            |
